@@ -70,3 +70,11 @@ pyinstaller --onefile --noconsole --paths=../ monitorar_preco.py
 # Conclusão
 
 Se estou querendo muito um produto tenho à alternativa de deixar o site de uma loja aberta em uma aba no navegador e ir atualizando (F5) na medida que vou lembrando durante o dia, porém, pode ser que em algum momento esqueça e ainda não consiga pegar alguma promoção relâmpago. Neste caso, como o e-mail é uma ferramenta de trabalho, além disso, também sou notificado na tela do celular ao recebê-lo, então, é viável deixar que o Python faça esse monitoramento e envie uma notificação via e-mail quando o produto atingir o valor desejado.
+
+# Autor
+Marquescharlon Santos
+
+- GitHub: [@marquescharlon](https://github.com/marquescharlon)
+- LinkedIn: [@marquescharlon](https://www.linkedin.com/in/marquescharlon/)
+
+⭐️ Dê uma estrela se este projeto te ajudou!
