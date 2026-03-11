@@ -1,51 +1,69 @@
 import smtplib
-import email.message
+from email.message import EmailMessage
 import security
 from datetime import datetime
 
-
-def send_email(destinatario: str = '', assunto: str = '', mensagem: str = ''):
+def send_email(destinatario: str, assunto: str, mensagem_html: str, mensagem_texto: str = None):
     """
-    destinatario='Quem irá receber o e-mail' \n
-    assunto='Texto fixo ou usar variável'
-    mensagem='Texto fixo ou usar variável'
+    Envia e-mail com versão HTML e texto puro (fallback).
+    Inclui timestamp no corpo da mensagem.
     """
+    # Obtém a data/hora atual
+    agora = datetime.now()
+    timestamp = agora.strftime("%d/%m/%Y %H:%M:%S")
 
-    atual = datetime.now()
-    s2 = atual.strftime("%d/%m/%Y, %H:%M:%S")
+    # Se não foi fornecida versão texto, cria uma básica
+    if mensagem_texto is None:
+        mensagem_texto = f"Mensagem enviada em {timestamp}\n\nConteúdo HTML não suportado."
 
-    email_content = f"""
-    {s2} | {mensagem} \n
-    """
+    # Adiciona timestamp ao HTML (insere antes do fechamento do body)
+    mensagem_html_com_timestamp = mensagem_html.replace(
+        '</body>',
+        f'<p style="color: #999; font-size: 11px; text-align: center;">E-mail enviado em {timestamp}</p>\n</body>'
+    )
 
-    msg = email.message.Message()
-    msg['Subject'] = assunto
-    msg['From'] = destinatario
-    msg['To'] = destinatario
-    password = security.password_email
+    # Configuração do servidor SMTP do Gmail
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(security.username_email, security.password_email)
 
-    msg.add_header('Content-Type', 'text/html')
-    msg.set_payload(email_content)
+    # Cria a mensagem
+    email_msg = EmailMessage()
+    email_msg['From'] = security.username_email
+    email_msg['To'] = destinatario
+    email_msg['Subject'] = assunto
 
-    s = smtplib.SMTP('smtp.gmail.com: 587')
-    s.starttls()
-    s.login(msg['From'], password)
-    s.sendmail(msg['From'], [msg['To']], msg.as_string().encode('utf-8'))
+    # Adiciona as duas versões: texto puro e HTML
+    email_msg.set_content(mensagem_texto)
+    email_msg.add_alternative(mensagem_html_com_timestamp, subtype='html')
+
+    # Envia
+    server.send_message(email_msg)
+    server.quit()
 
     print("E-mail enviado com sucesso!")
 
-
+# Bloco de teste (opcional)
 if __name__ == '__main__':
+    # Exemplo de teste
+    titulo = 'Tênis Fila Racer Speedzone'
+    preco_original = 'R$ 549,00'
+    preco_atual = 'R$ 479,00'
+    status = 'Ainda acima de R$ 400,00'
+    link = 'https://produto.mercadolivre.com.br/...'
 
-    title = 'Apple iPhone 14 Pro Max 128GB Preto-espacial - 6,7” 48MP iOS 5G'
-    URL = 'https://www.magazinevoce.com.br/magazineqro/apple-iphone-14-pro-max-128gb-preto-espacial-67-48mp-ios-5g/p/235924800/TE/14PM/'
-    price = float(8009.99)
+    html_teste = f"""
+    <h1>{titulo}</h1>
+    <p>Original: {preco_original}</p>
+    <p>Atual: <strong>{preco_atual}</strong></p>
+    <p>{status}</p>
+    <a href="{link}">Ver produto</a>
+    """
+    texto_teste = f"{titulo}\nOriginal: {preco_original}\nAtual: {preco_atual}\n{status}\nLink: {link}"
 
-    mensagem = URL
-    mensagem += ' | '
-    mensagem += title
-    mensagem += ' | '
-    mensagem += str(price)
-
-    send_email(destinatario=security.username_email,
-               assunto=title, mensagem=mensagem)
+    send_email(
+        destinatario=security.username_email,
+        assunto='Teste do monitor de preços',
+        mensagem_html=html_teste,
+        mensagem_texto=texto_teste
+    )
