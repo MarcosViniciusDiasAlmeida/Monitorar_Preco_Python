@@ -155,7 +155,7 @@ def monitoramento(EnviarEmail: bool):
     print(f"Preço original: {preco_original_str}")
     print(f"Preço atual: {preco_atual_str}")
 
-    # --- ENVIO DE E-MAIL ---
+    # --- ENVIO DE E-MAIL (APENAS SE ABAIXO DE R$ 400) ---
     if EnviarEmail:
         if preco_atual < 400:
             email.send_email(
@@ -164,18 +164,11 @@ def monitoramento(EnviarEmail: bool):
                 mensagem_html=mensagem_html,
                 mensagem_texto=mensagem_texto
             )
-            print("E-mail de promoção enviado!")
+            print("✅ E-mail de promoção enviado!")
         else:
-            # Se quiser receber atualizações mesmo sem promoção, descomente:
-            email.send_email(
-                destinatario=security.username_email,
-                assunto=f'📊 Atualização de preço - {title}',
-                mensagem_html=mensagem_html,
-                mensagem_texto=mensagem_texto
-            )
-            print("E-mail de atualização enviado (sem promoção).")
+            print(f"📉 Preço atual R$ {preco_atual:.2f} ainda não atingiu o alvo de R$ 400,00. Nenhum e-mail enviado.")
     else:
-        print("Envio de e-mail não autorizado.")
+        print("❌ Envio de e-mail desabilitado (EnviarEmail = False).")
 
 if __name__ == '__main__':
     monitoramento(EnviarEmail=True)
